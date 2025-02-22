@@ -1,8 +1,10 @@
+from venv import create
+
 from django.core.serializers import serialize
 from django.template.context_processors import request
 from rest_framework import generics, status
-from .models import Penali
-from .serializers import PenaliSerializer
+from .models import Task
+from .serializers import TaskSerializer
 from rest_framework.response import Response
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly,
@@ -12,28 +14,31 @@ from rest_framework.permissions import (IsAuthenticated,
                                         BasePermission,
                                         SAFE_METHODS)
 
-class IsAdminOrReadOnly(BasePermission):
-    def has_permission(self, request, view):
-        return bool(request.method in SAFE_METHODS or
-                    request.user and
-                    request.user.is_staff
-                    )
+class Perms(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.user.is_authenticated and request.method in ('GET', 'OPTIONS'):
+            return True
+        elif (request.user.is_authenticated and request.user == obj.asignee and
+              request.method in ('GET', 'OPTIONS', 'PUT')):
+            return True
 
 
-class PenaliListApiView(generics.ListCreateAPIView):
-    queryset = Penali.objects.all()
-    serializer_class = PenaliSerializer
-    permission_classes = [IsAdminOrReadOnly]
+
+
+
+class TaskListApiView(generics.ListCreateAPIView):
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
+    permission_classes = []
 
     def perform_create(self, serializer):
         instance = serializer.save()
         instance.player = self.request.user
         instance.save()
 
-class PenaliDetailApiView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Penali.objects.all()
-    serializer_class = PenaliSerializer
-    permission_classes = [DjangoModelPermissions]
+class TaskDetailApiView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
 
 
 

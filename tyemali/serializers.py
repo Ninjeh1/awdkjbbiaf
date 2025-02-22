@@ -1,9 +1,8 @@
 from rest_framework import serializers
-from .models import  Penali
+from .models import  Task
 
 
-class PenaliSerializer(serializers.ModelSerializer):
+class TaskSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Penali
+        model = Task
         fields = '__all__'
-        read_only_fields = ['player']
